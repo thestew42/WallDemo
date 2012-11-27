@@ -13,6 +13,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 //Array used to keep track of keyboard input
 bool	keys[256];
@@ -73,6 +74,8 @@ void GLNode::readConfiguration()
 
             //Extract the tag on this line
             tag = strtok(line, " :");
+			if(!tag)
+				continue;
 
             //Look for global variables or this node's sub-section
             if(!strcmp(tag, "totalWidth")) {
@@ -87,10 +90,14 @@ void GLNode::readConfiguration()
                 //Read this node's properties
                 while(!feof(fp)) {
                     //Read a line
-                    fgets(line, 256, fp);
+                    if(!fgets(line, 256, fp))
+						break;
 
                     //Extract the tag on this line
                     tag = strtok(line, " :");
+					if(!tag)
+						break;
+
                     if(!strcmp(tag, "width")) {
                         number = strtok(NULL, " :");
                         sscanf(number, "%d", &win_width);
@@ -121,6 +128,7 @@ void GLNode::readConfiguration()
                 }
             }
         }
+		fclose(fp);
     } else {
         printf("Error opening config file\n");
     }
@@ -570,8 +578,27 @@ GLvoid GLNode::ReSizeGLScene(GLsizei width, GLsizei height)
 	glMatrixMode(GL_PROJECTION);						// Select The Projection Matrix
 	glLoadIdentity();									// Reset The Projection Matrix
 
-	// Calculate The Aspect Ratio Of The Window
-	gluPerspective(45.0f,(GLfloat)width/(GLfloat)height,0.1f,100.0f);
+	//Calculate the correct frustum for this portion of the host application
+	float near_clip = 0.1f;
+	float far_clip = 100.0f;
+	float fov = 45.0f;
+	float aspect = (float)host_width / (float)host_height;
+	float full_width = 2.0f * tan(fov * PI / 180.0f) * near_clip;
+	float full_height = full_width / aspect;
+
+	float part_width = (float)win_width / (float)host_width;
+	float part_height = (float)win_height / (float)host_height;
+	float left = (float)x_offset / (float)host_width - 0.5f;
+	float right = left + part_width;
+	float top = -1.0f * ((float)y_offset / (float)host_height - 0.5f);
+	float bottom = top - part_height;
+
+	left *= full_width;
+	right *= full_width;
+	bottom *= full_height;
+	top *= full_height;
+
+	glFrustum(left, right, bottom, top, near_clip, far_clip);
 
 	glMatrixMode(GL_MODELVIEW);							// Select The Modelview Matrix
 	glLoadIdentity();									// Reset The Modelview Matrix

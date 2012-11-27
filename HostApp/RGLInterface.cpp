@@ -39,6 +39,8 @@ RGLInterface::RGLInterface(char *configFile)
 
             //Extract the tag on this line
             tag = strtok(line, " :");
+			if(!tag)
+				continue;
 
             //Look for global variables or this node's sub-section
             if(!strcmp(tag, "totalWidth")) {
@@ -61,11 +63,29 @@ RGLInterface::RGLInterface(char *configFile)
                 //Read the next node's properties
                 while(!feof(fp)) {
                     //Read a line
-                    fgets(line, 256, fp);
+					if(!fgets(line, 256, fp))
+						break;
 
                     //Extract the tag on this line
-                    tag = strtok(line, " :");
-                    if(!strcmp(tag, "width")) {
+					if(!(tag = strtok(line, " :"))) {
+						//Construct this node's pipe
+						pipes[nodes_read] = new GLPipe(
+							width,
+							height,
+							win_width,
+							win_height,
+							x_offset,
+							y_offset,
+							x_location,
+							y_location,
+							device_id,
+							port,
+							name);
+						pipes[nodes_read]->printStatus();
+
+						nodes_read++;
+						break;
+					} else if(!strcmp(tag, "width")) {
                         number = strtok(NULL, " :");
                         sscanf(number, "%d", &win_width);
                     } else if(!strcmp(tag, "height")) {
@@ -111,6 +131,7 @@ RGLInterface::RGLInterface(char *configFile)
                 }
             }
         }
+		fclose(fp);
     } else {
         printf("Error opening config file\n");
     }

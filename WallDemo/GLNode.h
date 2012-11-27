@@ -14,11 +14,10 @@
 #include <gl\gl.h>
 #include <gl\glu.h>
 
-//Needs to be able to hold all the OpenGL functions we implement
-#define NUM_HANDLERS 300;
-
 //The size of the buffer to hold command and arguments
 #define BUFFER_SIZE 10485760
+
+#define PI 3.14159265f
 
 //Declaration For WndProc
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);

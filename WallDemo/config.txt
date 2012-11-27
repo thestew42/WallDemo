@@ -9,7 +9,7 @@ left:
   xLocation: 0
   yLocation: 0
   device: 0
-  address: 1337
+  address: 13337
 
 right:
   width: 640
@@ -19,4 +19,4 @@ right:
   xLocation: 640
   yLocation: 0
   device: 0
-  address: 1338
+  address: 13338
