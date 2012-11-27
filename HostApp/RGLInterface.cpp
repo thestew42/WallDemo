@@ -297,3 +297,24 @@ void RGLInterface::glVertex3f(GLfloat x, GLfloat y, GLfloat z)
 	pushGLfloat(z);
 	sendCommand();
 }
+
+//8: glColor3f — Sets the current color
+void RGLInterface::glColor3f(GLfloat red, GLfloat green, GLfloat blue)
+{
+	pushCommand(8);
+	pushGLfloat(red);
+	pushGLfloat(green);
+	pushGLfloat(blue);
+	sendCommand();
+}
+
+//9: glRotatef — multiply the current matrix by a rotation matrix
+void RGLInterface::glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
+{
+	pushCommand(9);
+	pushGLfloat(angle);
+	pushGLfloat(x);
+	pushGLfloat(y);
+	pushGLfloat(z);
+	sendCommand();
+}

@@ -30,7 +30,9 @@ GLFHandler handlers[] = {NULL,
 	&GLNode::_glTranslatef,
 	&GLNode::_glBegin,
 	&GLNode::_glEnd,
-	&GLNode::_glVertex3f
+	&GLNode::_glVertex3f,
+	&GLNode::_glColor3f,
+	&GLNode::_glRotatef
 };
 
 //Constructor for the GLNode
@@ -436,7 +438,7 @@ BOOL GLNode::createWindow(char* title, int width, int height, int bits)
                                 dwStyle |                           // Defined Window Style
                                 WS_CLIPSIBLINGS |                   // Required Window Style
                                 WS_CLIPCHILDREN,                    // Required Window Style
-                                0, 0,                               // Window Position
+                                x_location, y_location,             // Window Position
                                 WindowRect.right-WindowRect.left,   // Calculate Window Width
                                 WindowRect.bottom-WindowRect.top,   // Calculate Window Height
                                 NULL,                               // No Parent Window
@@ -745,4 +747,27 @@ void GLNode::_glVertex3f()
 	getGLfloat(&y);
 	getGLfloat(&z);
 	glVertex3f(x, y, z);
+}
+
+//8: glColor3f — Sets the current color
+void GLNode::_glColor3f()
+{
+	GLfloat red, green, blue;
+	prepareBuffer(3 * sizeof(GLfloat));
+	getGLfloat(&red);
+	getGLfloat(&green);
+	getGLfloat(&blue);
+	glColor3f(red, green, blue);
+}
+
+//9: glRotatef — multiply the current matrix by a rotation matrix
+void GLNode::_glRotatef()
+{
+	GLfloat angle, x, y, z;
+	prepareBuffer(4 * sizeof(GLfloat));
+	getGLfloat(&angle);
+	getGLfloat(&x);
+	getGLfloat(&y);
+	getGLfloat(&z);
+	glRotatef(angle, x, y, z);
 }

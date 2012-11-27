@@ -62,31 +62,48 @@ int App::run(int argc, char **argv)
 
 int App::mainLoop()
 {
+	float rtri = 0.0f;
 	rgl_interface->glClearColor(0.0f, 0.0f, 0.3f, 0.5f);
 
 	//Main render loop
 	for(;;) {
+		//Clear the color and depth buffer
 		rgl_interface->glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		
+		//Set up model transform matrix
 		rgl_interface->glLoadIdentity();
-		rgl_interface->glTranslatef(-1.5f,0.0f,-6.0f);
+		rgl_interface->glTranslatef(0.0f, 0.0f, -7.0f);
+		rgl_interface->glRotatef(rtri, 0.0f, 1.0f, 0.0f);
+
+		//Draw the shape
 		rgl_interface->glBegin(GL_TRIANGLES);
+			rgl_interface->glColor3f(1.0f,0.0f,0.0f);
 			rgl_interface->glVertex3f( 0.0f, 1.0f, 0.0f);
-			rgl_interface->glVertex3f(-1.0f,-1.0f, 0.0f);
-			rgl_interface->glVertex3f( 1.0f,-1.0f, 0.0f);
-		rgl_interface->glEnd();
-		rgl_interface->glTranslatef(3.0f,0.0f,0.0f);
-		rgl_interface->glBegin(GL_QUADS);
-			rgl_interface->glVertex3f(-1.0f, 1.0f, 0.0f);
-			rgl_interface->glVertex3f( 1.0f, 1.0f, 0.0f);
-			rgl_interface->glVertex3f( 1.0f,-1.0f, 0.0f);
-			rgl_interface->glVertex3f(-1.0f,-1.0f, 0.0f);
+			rgl_interface->glColor3f(0.0f,1.0f,0.0f);
+			rgl_interface->glVertex3f(-1.0f,-1.0f, 1.0f);
+			rgl_interface->glColor3f(0.0f,0.0f,1.0f);
+			rgl_interface->glVertex3f( 1.0f,-1.0f, 1.0f);
+
+			rgl_interface->glColor3f(1.0f,0.0f,0.0f);
+			rgl_interface->glVertex3f( 0.0f, 1.0f, 0.0f);
+			rgl_interface->glColor3f(0.0f,1.0f,0.0f);
+			rgl_interface->glVertex3f( 1.0f,-1.0f, -1.0f);
+			rgl_interface->glColor3f(0.0f,0.0f,1.0f);
+			rgl_interface->glVertex3f(-1.0f,-1.0f, -1.0f);
+   
+			rgl_interface->glColor3f(1.0f,0.0f,0.0f);
+			rgl_interface->glVertex3f( 0.0f, 1.0f, 0.0f);
+			rgl_interface->glColor3f(0.0f,0.0f,1.0f);
+			rgl_interface->glVertex3f(-1.0f,-1.0f,-1.0f);
+			rgl_interface->glColor3f(0.0f,1.0f,0.0f);
+			rgl_interface->glVertex3f(-1.0f,-1.0f, 1.0f);
 		rgl_interface->glEnd();
 
 		//Frame rendering done, send sync packet
 		rgl_interface->sendSync();
 
-		//Sleep between frames
-		Sleep(25);
+		//Sleep between frames and rotate shape
+		rtri += 0.2f;
 	}
 
 	return 0;

@@ -128,4 +128,6 @@ public:
 	void _glBegin();
 	void _glEnd();
 	void _glVertex3f();
+	void _glColor3f();
+	void _glRotatef();
 };

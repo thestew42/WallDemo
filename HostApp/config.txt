@@ -1,22 +1,22 @@
-totalWidth: 1280
-totalHeight: 480
+totalWidth: 3840
+totalHeight: 1080
 nodes: 2
 left:
-  width: 640
-  height: 480
+  width: 1920
+  height: 1080
   xOffset: 0
   yOffset: 0
-  xLocation: 0
+  xLocation: -1920
   yLocation: 0
   device: 0
   address: 13337
 
 right:
-  width: 640
-  height: 480
-  xOffset: 640
+  width: 1920
+  height: 1080
+  xOffset: 1920
   yOffset: 0
-  xLocation: 640
+  xLocation: 0
   yLocation: 0
   device: 0
   address: 13338
