@@ -38,20 +38,20 @@ GLFHandler handlers[] = {NULL,
 //Constructor for the GLNode
 GLNode::GLNode(char *i_configFile, char *i_nodeIndentifier)
 {
-    configFile = i_configFile;
-    nodeIdentifier = i_nodeIndentifier;
+	configFile = i_configFile;
+	nodeIdentifier = i_nodeIndentifier;
 
-    hDC = NULL;
-    hRC = NULL;
-    hWnd = NULL;
+	hDC = NULL;
+	hRC = NULL;
+	hWnd = NULL;
 	fullscreen = FALSE;
 	sync = FALSE;
 
 	buffer = new char[BUFFER_SIZE];
 	buffer_pointer = 0;
 
-    //Read configuration from file into members
-    readConfiguration();
+	//Read configuration from file into members
+	readConfiguration();
 }
 
 //Destructor
@@ -63,185 +63,185 @@ GLNode::~GLNode()
 //Reads data from the configuration file into this node's properties
 void GLNode::readConfiguration()
 {
-    char *line = new char[256];
-    char *tag;
-    char *number;
-    FILE *fp = fopen(configFile, "r");
+	char *line = new char[256];
+	char *tag;
+	char *number;
+	FILE *fp = fopen(configFile, "r");
 
-    if(fp) {
-        //Read each line in the config file sequentially
-        while(!feof(fp)) {
-            //Read a line
-            fgets(line, 256, fp);
+	if(fp) {
+		//Read each line in the config file sequentially
+		while(!feof(fp)) {
+			//Read a line
+			fgets(line, 256, fp);
 
-            //Extract the tag on this line
-            tag = strtok(line, " :");
+			//Extract the tag on this line
+			tag = strtok(line, " :");
 			if(!tag)
 				continue;
 
-            //Look for global variables or this node's sub-section
-            if(!strcmp(tag, "totalWidth")) {
-                number = strtok(NULL, " :");
-                sscanf(number, "%d", &host_width);
-            } else if(!strcmp(tag, "totalHeight")) {
-                number = strtok(NULL, " :");
-                sscanf(number, "%d", &host_height);
+			//Look for global variables or this node's sub-section
+			if(!strcmp(tag, "totalWidth")) {
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &host_width);
+			} else if(!strcmp(tag, "totalHeight")) {
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &host_height);
 			} else if(!strcmp(tag, "nodes")) {
-                //Ignore
-            } else if(!strcmp(tag, nodeIdentifier)) {
-                //Read this node's properties
-                while(!feof(fp)) {
-                    //Read a line
-                    if(!fgets(line, 256, fp))
+				//Ignore
+			} else if(!strcmp(tag, nodeIdentifier)) {
+				//Read this node's properties
+				while(!feof(fp)) {
+					//Read a line
+					if(!fgets(line, 256, fp))
 						break;
 
-                    //Extract the tag on this line
-                    tag = strtok(line, " :");
+					//Extract the tag on this line
+					tag = strtok(line, " :");
 					if(!tag)
 						break;
 
-                    if(!strcmp(tag, "width")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &win_width);
-                    } else if(!strcmp(tag, "height")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &win_height);
-                    } else if(!strcmp(tag, "xOffset")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &x_offset);
-                    } else if(!strcmp(tag, "yOffset")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &y_offset);
-                    } else if(!strcmp(tag, "xLocation")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &x_location);
-                    } else if(!strcmp(tag, "yLocation")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &y_location);
-                    } else if(!strcmp(tag, "device")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &device_id);
-                    } else if(!strcmp(tag, "address")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &port);
-                    } else {
-                        break;
-                    }
-                }
-            }
-        }
+					if(!strcmp(tag, "width")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &win_width);
+					} else if(!strcmp(tag, "height")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &win_height);
+					} else if(!strcmp(tag, "xOffset")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &x_offset);
+					} else if(!strcmp(tag, "yOffset")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &y_offset);
+					} else if(!strcmp(tag, "xLocation")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &x_location);
+					} else if(!strcmp(tag, "yLocation")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &y_location);
+					} else if(!strcmp(tag, "device")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &device_id);
+					} else if(!strcmp(tag, "address")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &port);
+					} else {
+						break;
+					}
+				}
+			}
+		}
 		fclose(fp);
-    } else {
-        printf("Error opening config file\n");
-    }
+	} else {
+		printf("Error opening config file\n");
+	}
 
-    delete line;
+	delete line;
 }
 
 //Print the configuration data and connection status for this node
 void GLNode::printStatus()
 {
-    printf("GLNode configuration and status:\n");
-    printf("\tHost application dimensions: %dpx x %dpx\n", host_width, host_height);
-    printf("\tWindow dimensions: %dpx x %dpx\n", win_width, win_height);
-    printf("\tWindow offset: %dpx, %dpx\n", x_offset, y_offset);
-    printf("\tWindow location: %dpx, %dpx\n", x_location, y_location);
-    printf("\tUse graphics device: %d\n", device_id);
-    printf("\tListen on port: %d\n", port);
+	printf("GLNode configuration and status:\n");
+	printf("\tHost application dimensions: %dpx x %dpx\n", host_width, host_height);
+	printf("\tWindow dimensions: %dpx x %dpx\n", win_width, win_height);
+	printf("\tWindow offset: %dpx, %dpx\n", x_offset, y_offset);
+	printf("\tWindow location: %dpx, %dpx\n", x_location, y_location);
+	printf("\tUse graphics device: %d\n", device_id);
+	printf("\tListen on port: %d\n", port);
 }
 
 //Sets up socket to listen and waits for connections
 void GLNode::startListening()
 {
-    //Start winsock
-    WSADATA wsaData;
-    int starterr = WSAStartup(MAKEWORD(2,2), &wsaData);
+	//Start winsock
+	WSADATA wsaData;
+	int starterr = WSAStartup(MAKEWORD(2,2), &wsaData);
 
-    //Error checking
-    if(starterr != 0) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return;
-    }
-    
-    //Create the socket
-    SOCKET server_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(server_sock == INVALID_SOCKET) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return;
-    }
+	//Error checking
+	if(starterr != 0) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return;
+	}
+	
+	//Create the socket
+	SOCKET server_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if(server_sock == INVALID_SOCKET) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return;
+	}
 
-    //Bind the socket to the port from the config file
-    sockaddr_in anews;
-    anews.sin_port = htons(port);
-    anews.sin_addr.s_addr = INADDR_ANY;
-    anews.sin_family = AF_INET;
-    if(bind(server_sock, (sockaddr*)&anews, sizeof(anews)) == SOCKET_ERROR) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return;
-    }
+	//Bind the socket to the port from the config file
+	sockaddr_in anews;
+	anews.sin_port = htons(port);
+	anews.sin_addr.s_addr = INADDR_ANY;
+	anews.sin_family = AF_INET;
+	if(bind(server_sock, (sockaddr*)&anews, sizeof(anews)) == SOCKET_ERROR) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return;
+	}
 
-    //Start listening for connections
-    if(listen(server_sock, SOMAXCONN) == SOCKET_ERROR) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return;
-    }
+	//Start listening for connections
+	if(listen(server_sock, SOMAXCONN) == SOCKET_ERROR) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return;
+	}
 
-    //Accept a connection
-    node_sock = accept(server_sock, NULL, NULL);
-    if(node_sock == INVALID_SOCKET) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return;
-    }
+	//Accept a connection
+	node_sock = accept(server_sock, NULL, NULL);
+	if(node_sock == INVALID_SOCKET) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return;
+	}
 
-    //Start connection handling code
-    acceptConnection();
+	//Start connection handling code
+	acceptConnection();
 
-    //Clean up and exit
-    printf("Cleaning up and exiting from listen code\n");
-    closesocket(node_sock);
-    closesocket(server_sock);
+	//Clean up and exit
+	printf("Cleaning up and exiting from listen code\n");
+	closesocket(node_sock);
+	closesocket(server_sock);
 
-    WSACleanup();
-    return;
+	WSACleanup();
+	return;
 }
 
 //Accepts a connection by setting up a window and starting the main loop
 void GLNode::acceptConnection()
 {
-    char *buffer = new char[256];
-    int length = 0;
+	char *buffer = new char[256];
+	int length = 0;
 
-    //Receive node name from host to make sure connection is valid
-    if((length = recv(node_sock, buffer, 256, 0)) != 256) {
-        if(length == 0)
-            printf("Connection was terminated unexpectedly\n");
-        else
-            printf("Error %d occurred!\n",  WSAGetLastError());
-        return;
-    }
+	//Receive node name from host to make sure connection is valid
+	if((length = recv(node_sock, buffer, 256, 0)) != 256) {
+		if(length == 0)
+			printf("Connection was terminated unexpectedly\n");
+		else
+			printf("Error %d occurred!\n",  WSAGetLastError());
+		return;
+	}
 
-    if(strcmp(buffer, nodeIdentifier) != 0) {
-        printf("Incorrect node identifier sent by the host. Terminating connection.\n");
-        return;
-    }
+	if(strcmp(buffer, nodeIdentifier) != 0) {
+		printf("Incorrect node identifier sent by the host. Terminating connection.\n");
+		return;
+	}
 
-    //Create the OpenGL window
-    if(createWindow(nodeIdentifier, win_width, win_height, 24)) {
-        //Start looping and waiting for OpenGL commands from the host
-        mainLoop();
-    }
+	//Create the OpenGL window
+	if(createWindow(nodeIdentifier, win_width, win_height, 24)) {
+		//Start looping and waiting for OpenGL commands from the host
+		mainLoop();
+	}
 
 	//Kill the window
 	KillGLWindow();
 
-    delete buffer;
+	delete buffer;
 
-    return;
+	return;
 }
 
 //Handles messages and relays commands from the host
@@ -295,12 +295,12 @@ int GLNode::receiveCommand()
 	
 	//Grab the command ID
 	if((length = recv(node_sock, (char*)(&id), sizeof(int), 0)) != sizeof(int)) {
-        if(length == 0)
-            printf("Connection was terminated unexpectedly\n");
-        else
-            printf("Error %d occurred!\n",  WSAGetLastError());
-        return -1;
-    }
+		if(length == 0)
+			printf("Connection was terminated unexpectedly\n");
+		else
+			printf("Error %d occurred!\n",  WSAGetLastError());
+		return -1;
+	}
 
 	if(id == 0) {
 		//This is a syncronize message, signal the window to swap buffers
@@ -320,12 +320,12 @@ void GLNode::prepareBuffer(unsigned int length)
 	
 	//Grab the command arguments
 	if((recv_length = recv(node_sock, buffer, length, 0)) != length) {
-        if(recv_length == 0)
-            printf("Connection was terminated unexpectedly\n");
-        else
-            printf("Error %d occurred!\n",  WSAGetLastError());
-        return;
-    }
+		if(recv_length == 0)
+			printf("Connection was terminated unexpectedly\n");
+		else
+			printf("Error %d occurred!\n",  WSAGetLastError());
+		return;
+	}
 
 	//Reset pointer
 	buffer_pointer = 0;
@@ -362,165 +362,165 @@ void GLNode::getGLenum(GLenum *value)
  *  Code taken from NeHe (http://nehe.gamedev.net/) Tutorial 2              */
 BOOL GLNode::createWindow(char* title, int width, int height, int bits)
 {
-    GLuint      PixelFormat;            // Holds The Results After Searching For A Match
-    WNDCLASS    wc;                     // Windows Class Structure
-    DWORD       dwExStyle;              // Window Extended Style
-    DWORD       dwStyle;                // Window Style
-    RECT        WindowRect;             // Grabs Rectangle Upper Left / Lower Right Values
-    WindowRect.left=(long)0;            // Set Left Value To 0
-    WindowRect.right=(long)width;       // Set Right Value To Requested Width
-    WindowRect.top=(long)0;             // Set Top Value To 0
-    WindowRect.bottom=(long)height;     // Set Bottom Value To Requested Height
+	GLuint      PixelFormat;            // Holds The Results After Searching For A Match
+	WNDCLASS    wc;                     // Windows Class Structure
+	DWORD       dwExStyle;              // Window Extended Style
+	DWORD       dwStyle;                // Window Style
+	RECT        WindowRect;             // Grabs Rectangle Upper Left / Lower Right Values
+	WindowRect.left=(long)0;            // Set Left Value To 0
+	WindowRect.right=(long)width;       // Set Right Value To Requested Width
+	WindowRect.top=(long)0;             // Set Top Value To 0
+	WindowRect.bottom=(long)height;     // Set Bottom Value To Requested Height
 
-    hInstance           = GetModuleHandle(NULL);                // Grab An Instance For Our Window
-    wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;   // Redraw On Size, And Own DC For Window.
-    wc.lpfnWndProc      = (WNDPROC) WndProc;                    // WndProc Handles Messages
-    wc.cbClsExtra       = 0;                                    // No Extra Window Data
-    wc.cbWndExtra       = 0;                                    // No Extra Window Data
-    wc.hInstance        = hInstance;                            // Set The Instance
-    wc.hIcon            = LoadIcon(NULL, IDI_WINLOGO);          // Load The Default Icon
-    wc.hCursor          = LoadCursor(NULL, IDC_ARROW);          // Load The Arrow Pointer
-    wc.hbrBackground    = NULL;                                 // No Background Required For GL
-    wc.lpszMenuName     = NULL;                                 // We Don't Want A Menu
-    wc.lpszClassName    = "OpenGL";                             // Set The Class Name
+	hInstance           = GetModuleHandle(NULL);                // Grab An Instance For Our Window
+	wc.style            = CS_HREDRAW | CS_VREDRAW | CS_OWNDC;   // Redraw On Size, And Own DC For Window.
+	wc.lpfnWndProc      = (WNDPROC) WndProc;                    // WndProc Handles Messages
+	wc.cbClsExtra       = 0;                                    // No Extra Window Data
+	wc.cbWndExtra       = 0;                                    // No Extra Window Data
+	wc.hInstance        = hInstance;                            // Set The Instance
+	wc.hIcon            = LoadIcon(NULL, IDI_WINLOGO);          // Load The Default Icon
+	wc.hCursor          = LoadCursor(NULL, IDC_ARROW);          // Load The Arrow Pointer
+	wc.hbrBackground    = NULL;                                 // No Background Required For GL
+	wc.lpszMenuName     = NULL;                                 // We Don't Want A Menu
+	wc.lpszClassName    = "OpenGL";                             // Set The Class Name
 
-    if (!RegisterClass(&wc))                                    // Attempt To Register The Window Class
-    {
-        MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                                           // Return FALSE
-    }
-    
-    if (fullscreen)                                             // Attempt Fullscreen Mode?
-    {
-        DEVMODE dmScreenSettings;                               // Device Mode
-        memset(&dmScreenSettings,0,sizeof(dmScreenSettings));   // Makes Sure Memory's Cleared
-        dmScreenSettings.dmSize=sizeof(dmScreenSettings);       // Size Of The Devmode Structure
-        dmScreenSettings.dmPelsWidth    = width;                // Selected Screen Width
-        dmScreenSettings.dmPelsHeight   = height;               // Selected Screen Height
-        dmScreenSettings.dmBitsPerPel   = bits;                 // Selected Bits Per Pixel
-        dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
+	if (!RegisterClass(&wc))                                    // Attempt To Register The Window Class
+	{
+		MessageBox(NULL,"Failed To Register The Window Class.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                                           // Return FALSE
+	}
+	
+	if (fullscreen)                                             // Attempt Fullscreen Mode?
+	{
+		DEVMODE dmScreenSettings;                               // Device Mode
+		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));   // Makes Sure Memory's Cleared
+		dmScreenSettings.dmSize=sizeof(dmScreenSettings);       // Size Of The Devmode Structure
+		dmScreenSettings.dmPelsWidth    = width;                // Selected Screen Width
+		dmScreenSettings.dmPelsHeight   = height;               // Selected Screen Height
+		dmScreenSettings.dmBitsPerPel   = bits;                 // Selected Bits Per Pixel
+		dmScreenSettings.dmFields=DM_BITSPERPEL|DM_PELSWIDTH|DM_PELSHEIGHT;
 
-        // Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
-        if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
-        {
-            // If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
-            if (MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","NeHe GL",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
-            {
-                fullscreen=FALSE;       // Windowed Mode Selected.  Fullscreen = FALSE
-            }
-            else
-            {
-                // Pop Up A Message Box Letting User Know The Program Is Closing.
-                MessageBox(NULL,"Program Will Now Close.","ERROR",MB_OK|MB_ICONSTOP);
-                return FALSE;                                   // Return FALSE
-            }
-        }
-    }
+		// Try To Set Selected Mode And Get Results.  NOTE: CDS_FULLSCREEN Gets Rid Of Start Bar.
+		if (ChangeDisplaySettings(&dmScreenSettings,CDS_FULLSCREEN)!=DISP_CHANGE_SUCCESSFUL)
+		{
+			// If The Mode Fails, Offer Two Options.  Quit Or Use Windowed Mode.
+			if (MessageBox(NULL,"The Requested Fullscreen Mode Is Not Supported By\nYour Video Card. Use Windowed Mode Instead?","NeHe GL",MB_YESNO|MB_ICONEXCLAMATION)==IDYES)
+			{
+				fullscreen=FALSE;       // Windowed Mode Selected.  Fullscreen = FALSE
+			}
+			else
+			{
+				// Pop Up A Message Box Letting User Know The Program Is Closing.
+				MessageBox(NULL,"Program Will Now Close.","ERROR",MB_OK|MB_ICONSTOP);
+				return FALSE;                                   // Return FALSE
+			}
+		}
+	}
 
-    if (fullscreen)                                             // Are We Still In Fullscreen Mode?
-    {
-        dwExStyle=WS_EX_APPWINDOW;                              // Window Extended Style
-        dwStyle=WS_POPUP;                                       // Windows Style
-        ShowCursor(FALSE);                                      // Hide Mouse Pointer
-    }
-    else
-    {
-        dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;           // Window Extended Style
-        dwStyle=WS_OVERLAPPEDWINDOW;                            // Windows Style
-    }
+	if (fullscreen)                                             // Are We Still In Fullscreen Mode?
+	{
+		dwExStyle=WS_EX_APPWINDOW;                              // Window Extended Style
+		dwStyle=WS_POPUP;                                       // Windows Style
+		ShowCursor(FALSE);                                      // Hide Mouse Pointer
+	}
+	else
+	{
+		dwExStyle=WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;           // Window Extended Style
+		dwStyle=WS_OVERLAPPEDWINDOW;                            // Windows Style
+	}
 
-    AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);     // Adjust Window To True Requested Size
+	AdjustWindowRectEx(&WindowRect, dwStyle, FALSE, dwExStyle);     // Adjust Window To True Requested Size
 
-    // Create The Window
-    if (!(hWnd=CreateWindowEx(  dwExStyle,                          // Extended Style For The Window
-                                "OpenGL",                           // Class Name
-                                title,                              // Window Title
-                                dwStyle |                           // Defined Window Style
-                                WS_CLIPSIBLINGS |                   // Required Window Style
-                                WS_CLIPCHILDREN,                    // Required Window Style
-                                x_location, y_location,             // Window Position
-                                WindowRect.right-WindowRect.left,   // Calculate Window Width
-                                WindowRect.bottom-WindowRect.top,   // Calculate Window Height
-                                NULL,                               // No Parent Window
-                                NULL,                               // No Menu
-                                hInstance,                          // Instance
-                                NULL)))                             // Dont Pass Anything To WM_CREATE
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	// Create The Window
+	if (!(hWnd=CreateWindowEx(  dwExStyle,                          // Extended Style For The Window
+								"OpenGL",                           // Class Name
+								title,                              // Window Title
+								dwStyle |                           // Defined Window Style
+								WS_CLIPSIBLINGS |                   // Required Window Style
+								WS_CLIPCHILDREN,                    // Required Window Style
+								x_location, y_location,             // Window Position
+								WindowRect.right-WindowRect.left,   // Calculate Window Width
+								WindowRect.bottom-WindowRect.top,   // Calculate Window Height
+								NULL,                               // No Parent Window
+								NULL,                               // No Menu
+								hInstance,                          // Instance
+								NULL)))                             // Dont Pass Anything To WM_CREATE
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Window Creation Error.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    static  PIXELFORMATDESCRIPTOR pfd=              // pfd Tells Windows How We Want Things To Be
-    {
-        sizeof(PIXELFORMATDESCRIPTOR),              // Size Of This Pixel Format Descriptor
-        1,                                          // Version Number
-        PFD_DRAW_TO_WINDOW |                        // Format Must Support Window
-        PFD_SUPPORT_OPENGL |                        // Format Must Support OpenGL
-        PFD_DOUBLEBUFFER,                           // Must Support Double Buffering
-        PFD_TYPE_RGBA,                              // Request An RGBA Format
-        bits,                                       // Select Our Color Depth
-        0, 0, 0, 0, 0, 0,                           // Color Bits Ignored
-        0,                                          // No Alpha Buffer
-        0,                                          // Shift Bit Ignored
-        0,                                          // No Accumulation Buffer
-        0, 0, 0, 0,                                 // Accumulation Bits Ignored
-        16,                                         // 16Bit Z-Buffer (Depth Buffer)  
-        0,                                          // No Stencil Buffer
-        0,                                          // No Auxiliary Buffer
-        PFD_MAIN_PLANE,                             // Main Drawing Layer
-        0,                                          // Reserved
-        0, 0, 0                                     // Layer Masks Ignored
-    };
-    
-    if (!(hDC=GetDC(hWnd)))                         // Did We Get A Device Context?
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	static  PIXELFORMATDESCRIPTOR pfd=              // pfd Tells Windows How We Want Things To Be
+	{
+		sizeof(PIXELFORMATDESCRIPTOR),              // Size Of This Pixel Format Descriptor
+		1,                                          // Version Number
+		PFD_DRAW_TO_WINDOW |                        // Format Must Support Window
+		PFD_SUPPORT_OPENGL |                        // Format Must Support OpenGL
+		PFD_DOUBLEBUFFER,                           // Must Support Double Buffering
+		PFD_TYPE_RGBA,                              // Request An RGBA Format
+		bits,                                       // Select Our Color Depth
+		0, 0, 0, 0, 0, 0,                           // Color Bits Ignored
+		0,                                          // No Alpha Buffer
+		0,                                          // Shift Bit Ignored
+		0,                                          // No Accumulation Buffer
+		0, 0, 0, 0,                                 // Accumulation Bits Ignored
+		16,                                         // 16Bit Z-Buffer (Depth Buffer)  
+		0,                                          // No Stencil Buffer
+		0,                                          // No Auxiliary Buffer
+		PFD_MAIN_PLANE,                             // Main Drawing Layer
+		0,                                          // Reserved
+		0, 0, 0                                     // Layer Masks Ignored
+	};
+	
+	if (!(hDC=GetDC(hWnd)))                         // Did We Get A Device Context?
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Can't Create A GL Device Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    if (!(PixelFormat=ChoosePixelFormat(hDC,&pfd))) // Did Windows Find A Matching Pixel Format?
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	if (!(PixelFormat=ChoosePixelFormat(hDC,&pfd))) // Did Windows Find A Matching Pixel Format?
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Can't Find A Suitable PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    if(!SetPixelFormat(hDC,PixelFormat,&pfd))       // Are We Able To Set The Pixel Format?
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	if(!SetPixelFormat(hDC,PixelFormat,&pfd))       // Are We Able To Set The Pixel Format?
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Can't Set The PixelFormat.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    if (!(hRC=wglCreateContext(hDC)))               // Are We Able To Get A Rendering Context?
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	if (!(hRC=wglCreateContext(hDC)))               // Are We Able To Get A Rendering Context?
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Can't Create A GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    if(!wglMakeCurrent(hDC,hRC))                    // Try To Activate The Rendering Context
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	if(!wglMakeCurrent(hDC,hRC))                    // Try To Activate The Rendering Context
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Can't Activate The GL Rendering Context.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    ShowWindow(hWnd,SW_SHOW);                       // Show The Window
-    SetForegroundWindow(hWnd);                      // Slightly Higher Priority
-    SetFocus(hWnd);                                 // Sets Keyboard Focus To The Window
-    ReSizeGLScene(width, height);                   // Set Up Our Perspective GL Screen
+	ShowWindow(hWnd,SW_SHOW);                       // Show The Window
+	SetForegroundWindow(hWnd);                      // Slightly Higher Priority
+	SetFocus(hWnd);                                 // Sets Keyboard Focus To The Window
+	ReSizeGLScene(width, height);                   // Set Up Our Perspective GL Screen
 
-    if (!InitGL())                                  // Initialize Our Newly Created GL Window
-    {
-        KillGLWindow();                             // Reset The Display
-        MessageBox(NULL,"Initialization Failed.","ERROR",MB_OK|MB_ICONEXCLAMATION);
-        return FALSE;                               // Return FALSE
-    }
+	if (!InitGL())                                  // Initialize Our Newly Created GL Window
+	{
+		KillGLWindow();                             // Reset The Display
+		MessageBox(NULL,"Initialization Failed.","ERROR",MB_OK|MB_ICONEXCLAMATION);
+		return FALSE;                               // Return FALSE
+	}
 
-    return TRUE;                                    // Success
+	return TRUE;                                    // Success
 }
 
 /*  Kills the OpenGL window                                                 *

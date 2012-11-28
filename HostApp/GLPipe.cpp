@@ -37,11 +37,11 @@ int GLPipe::connectPipe(char *address)
 	int length = 0;
 
 	//Create the socket
-    pipe_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-    if(pipe_sock == INVALID_SOCKET) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        return - 1;
-    }
+	pipe_sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if(pipe_sock == INVALID_SOCKET) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		return - 1;
+	}
 
 	//Connect to the node
 	sockaddr_in anews;
@@ -50,18 +50,18 @@ int GLPipe::connectPipe(char *address)
 	anews.sin_family = AF_INET;
 	if(connect(pipe_sock, (sockaddr*)&anews, sizeof(anews)) == SOCKET_ERROR) {
 		printf("Error %d occurred!\n",  WSAGetLastError());
-        return -1;
-    }
+		return -1;
+	}
 	
 	//Send the name of this pipe's target node for validity check
-    if((length = send(pipe_sock, node_identifier, 256, 0)) != 256) {
-        if(length == SOCKET_ERROR)
+	if((length = send(pipe_sock, node_identifier, 256, 0)) != 256) {
+		if(length == SOCKET_ERROR)
 			printf("Error %d occurred!\n",  WSAGetLastError());
 		else
-            printf("Connection was terminated unexpectedly\n");
-            
-        return -1;
-    }
+			printf("Connection was terminated unexpectedly\n");
+			
+		return -1;
+	}
 
 	return 0;
 }
@@ -78,14 +78,14 @@ int GLPipe::sendCommand(char *buffer, unsigned int length)
 	int send_length;
 
 	//Send the name of this pipe's target node for validity check
-    if((send_length = send(pipe_sock, buffer, length, 0)) != length) {
-        if(send_length == SOCKET_ERROR)
+	if((send_length = send(pipe_sock, buffer, length, 0)) != length) {
+		if(send_length == SOCKET_ERROR)
 			printf("Error %d occurred!",  WSAGetLastError());
 		else
-            printf("Connection was terminated unexpectedly");
-            
-        return -1;
-    }
+			printf("Connection was terminated unexpectedly");
+			
+		return -1;
+	}
 
 	return 0;
 }
@@ -93,11 +93,11 @@ int GLPipe::sendCommand(char *buffer, unsigned int length)
 //Print configuration information about the pipe
 void GLPipe::printStatus()
 {
-    printf("GLNode configuration and status:\n");
-    printf("\tHost application dimensions: %dpx x %dpx\n", host_width, host_height);
-    printf("\tWindow dimensions: %dpx x %dpx\n", win_width, win_height);
-    printf("\tWindow offset: %dpx, %dpx\n", x_offset, y_offset);
-    printf("\tWindow location: %dpx, %dpx\n", x_location, y_location);
-    printf("\tUse graphics device: %d\n", device_id);
-    printf("\tListen on port: %d\n", port);
+	printf("GLNode configuration and status:\n");
+	printf("\tHost application dimensions: %dpx x %dpx\n", host_width, host_height);
+	printf("\tWindow dimensions: %dpx x %dpx\n", win_width, win_height);
+	printf("\tWindow offset: %dpx, %dpx\n", x_offset, y_offset);
+	printf("\tWindow location: %dpx, %dpx\n", x_location, y_location);
+	printf("\tUse graphics device: %d\n", device_id);
+	printf("\tListen on port: %d\n", port);
 }

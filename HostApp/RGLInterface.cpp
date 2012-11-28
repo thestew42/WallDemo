@@ -12,8 +12,8 @@
 RGLInterface::RGLInterface(char *configFile)
 {
 	char *line = new char[256];
-    char *tag;
-    char *number;
+	char *tag;
+	char *number;
 
 	//Number of nodes that have been parsed
 	int nodes_read = 0;
@@ -29,44 +29,44 @@ RGLInterface::RGLInterface(char *configFile)
 	pipes = NULL;
 	buffer = NULL;
 	buffer_pointer = 0;
-    FILE *fp = fopen(configFile, "r");
+	FILE *fp = fopen(configFile, "r");
 
-    if(fp) {
-        //Read each line in the config file sequentially
-        while(!feof(fp)) {
-            //Read a line
-            fgets(line, 256, fp);
+	if(fp) {
+		//Read each line in the config file sequentially
+		while(!feof(fp)) {
+			//Read a line
+			fgets(line, 256, fp);
 
-            //Extract the tag on this line
-            tag = strtok(line, " :");
+			//Extract the tag on this line
+			tag = strtok(line, " :");
 			if(!tag)
 				continue;
 
-            //Look for global variables or this node's sub-section
-            if(!strcmp(tag, "totalWidth")) {
-                number = strtok(NULL, " :");
-                sscanf(number, "%d", &width);
-            } else if(!strcmp(tag, "totalHeight")) {
-                number = strtok(NULL, " :");
-                sscanf(number, "%d", &height);
+			//Look for global variables or this node's sub-section
+			if(!strcmp(tag, "totalWidth")) {
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &width);
+			} else if(!strcmp(tag, "totalHeight")) {
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &height);
 			} else if(!strcmp(tag, "nodes")) {
-                number = strtok(NULL, " :");
-                sscanf(number, "%d", &num_nodes);
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &num_nodes);
 
 				//Make room for the pipes
 				pipes = new GLPipe*[num_nodes];
-            } else if(nodes_read < num_nodes) {
+			} else if(nodes_read < num_nodes) {
 				//Copy the node's name
 				char *name = new char[256];
 				strcpy(name, tag);
 
-                //Read the next node's properties
-                while(!feof(fp)) {
-                    //Read a line
+				//Read the next node's properties
+				while(!feof(fp)) {
+					//Read a line
 					if(!fgets(line, 256, fp))
 						break;
 
-                    //Extract the tag on this line
+					//Extract the tag on this line
 					if(!(tag = strtok(line, " :"))) {
 						//Construct this node's pipe
 						pipes[nodes_read] = new GLPipe(
@@ -86,31 +86,31 @@ RGLInterface::RGLInterface(char *configFile)
 						nodes_read++;
 						break;
 					} else if(!strcmp(tag, "width")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &win_width);
-                    } else if(!strcmp(tag, "height")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &win_height);
-                    } else if(!strcmp(tag, "xOffset")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &x_offset);
-                    } else if(!strcmp(tag, "yOffset")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &y_offset);
-                    } else if(!strcmp(tag, "xLocation")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &x_location);
-                    } else if(!strcmp(tag, "yLocation")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &y_location);
-                    } else if(!strcmp(tag, "device")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &device_id);
-                    } else if(!strcmp(tag, "address")) {
-                        number = strtok(NULL, " :");
-                        sscanf(number, "%d", &port);
-                    } else {
-                        //Construct this node's pipe
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &win_width);
+					} else if(!strcmp(tag, "height")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &win_height);
+					} else if(!strcmp(tag, "xOffset")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &x_offset);
+					} else if(!strcmp(tag, "yOffset")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &y_offset);
+					} else if(!strcmp(tag, "xLocation")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &x_location);
+					} else if(!strcmp(tag, "yLocation")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &y_location);
+					} else if(!strcmp(tag, "device")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &device_id);
+					} else if(!strcmp(tag, "address")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &port);
+					} else {
+						//Construct this node's pipe
 						pipes[nodes_read] = new GLPipe(
 							width,
 							height,
@@ -127,16 +127,16 @@ RGLInterface::RGLInterface(char *configFile)
 
 						nodes_read++;
 						break;
-                    }
-                }
-            }
-        }
+					}
+				}
+			}
+		}
 		fclose(fp);
-    } else {
-        printf("Error opening config file\n");
-    }
+	} else {
+		printf("Error opening config file\n");
+	}
 
-    delete line;
+	delete line;
 }
 
 //Destructor
@@ -156,11 +156,11 @@ int RGLInterface::initialize(char *address)
 	int starterr = WSAStartup(MAKEWORD(2,2), &wsaData);
 
 	//Error checking
-    if(starterr != 0) {
-        printf("Error %d occurred!\n",  WSAGetLastError());
-        WSACleanup();
-        return -1;
-    }
+	if(starterr != 0) {
+		printf("Error %d occurred!\n",  WSAGetLastError());
+		WSACleanup();
+		return -1;
+	}
 
 	//Iterate through each pipe and establish connection
 	for(int i = 0; i < num_nodes; i++) {

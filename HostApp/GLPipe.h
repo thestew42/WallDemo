@@ -20,20 +20,20 @@ private:
 	//Window dimensions
 	int win_width, win_height;
 
-    //Total dimensions of the host application
-    int host_width, host_height;
+	//Total dimensions of the host application
+	int host_width, host_height;
 
-    //Offset of this window in the total resolution of the host
-    int x_offset, y_offset;
+	//Offset of this window in the total resolution of the host
+	int x_offset, y_offset;
 
-    //Location of this window in screen space
-    int x_location, y_location;
+	//Location of this window in screen space
+	int x_location, y_location;
 
-    //ID of the graphics device to use
-    int device_id;
+	//ID of the graphics device to use
+	int device_id;
 
-    //Port to listen on
-    int port;
+	//Port to listen on
+	int port;
 
 	//Name of this node
 	char *node_identifier;
@@ -55,5 +55,5 @@ public:
 	int sendCommand(char *buffer, unsigned int length);
 
 	//Prints out configuration data and connection info
-    void printStatus();
+	void printStatus();
 };
