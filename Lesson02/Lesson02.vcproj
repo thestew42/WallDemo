@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="HostApp"
-	ProjectGUID="{1B0C57B2-3903-44D3-83EC-D2764B8EA65D}"
-	RootNamespace="HostApp"
+	Name="Lesson02"
+	ProjectGUID="{5F3B90F0-CF49-47C0-A518-FE0C5D576562}"
+	RootNamespace="Lesson02"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -57,7 +57,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib Ws2_32.lib"
+				AdditionalDependencies="glu32.lib opengl32.lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -126,7 +126,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib Ws2_32.lib"
+				AdditionalDependencies="glu32.lib opengl32.lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -164,15 +164,7 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\App.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\GLPipe.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\RGLInterface.cpp"
+				RelativePath=".\Lesson2.cpp"
 				>
 			</File>
 		</Filter>
@@ -181,32 +173,12 @@
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath=".\App.h"
-				>
-			</File>
-			<File
-				RelativePath=".\dummy_gl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GLPipe.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RGLInterface.h"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\config.txt"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

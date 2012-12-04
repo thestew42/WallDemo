@@ -22,6 +22,7 @@ RGLInterface::RGLInterface(char *configFile)
 	int win_width, win_height;
 	int x_offset, y_offset;
 	int x_location, y_location;
+	int fullscreen;
 	int device_id;
 	int port;
 
@@ -106,6 +107,9 @@ RGLInterface::RGLInterface(char *configFile)
 					} else if(!strcmp(tag, "device")) {
 						number = strtok(NULL, " :");
 						sscanf(number, "%d", &device_id);
+					} else if(!strcmp(tag, "fullscreen")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &fullscreen);
 					} else if(!strcmp(tag, "address")) {
 						number = strtok(NULL, " :");
 						sscanf(number, "%d", &port);

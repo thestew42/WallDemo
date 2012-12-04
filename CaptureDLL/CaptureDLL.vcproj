@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="HostApp"
-	ProjectGUID="{1B0C57B2-3903-44D3-83EC-D2764B8EA65D}"
-	RootNamespace="HostApp"
+	Name="CaptureDLL"
+	ProjectGUID="{D342DDEA-DF64-423D-92C7-2889FBCA01E5}"
+	RootNamespace="CaptureDLL"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -19,7 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2"
 			>
 			<Tool
@@ -57,7 +57,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib Ws2_32.lib"
+				AdditionalDependencies="Ws2_32.lib"
+				OutputFile="$(OutDir)\opengl32.dll"
+				ModuleDefinitionFile=""
 				GenerateDebugInformation="true"
 				TargetMachine="1"
 			/>
@@ -87,7 +89,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -126,7 +128,9 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="glu32.lib opengl32.lib Ws2_32.lib"
+				AdditionalDependencies="Ws2_32.lib"
+				OutputFile="$(OutDir)\opengl32.dll"
+				ModuleDefinitionFile=""
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -164,15 +168,19 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\App.cpp"
+				RelativePath=".\capturedll.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\GLPipe.cpp"
+				RelativePath="..\HostApp\GLPipe.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\RGLInterface.cpp"
+				RelativePath=".\main.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\HostApp\RGLInterface.cpp"
 				>
 			</File>
 		</Filter>
@@ -182,19 +190,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\App.h"
+				RelativePath="..\HostApp\GLPipe.h"
 				>
 			</File>
 			<File
-				RelativePath=".\dummy_gl.h"
-				>
-			</File>
-			<File
-				RelativePath=".\GLPipe.h"
-				>
-			</File>
-			<File
-				RelativePath=".\RGLInterface.h"
+				RelativePath="..\HostApp\RGLInterface.h"
 				>
 			</File>
 		</Filter>
@@ -203,10 +203,6 @@
 			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
 			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\config.txt"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -44,7 +44,7 @@ GLNode::GLNode(char *i_configFile, char *i_nodeIndentifier)
 	hDC = NULL;
 	hRC = NULL;
 	hWnd = NULL;
-	fullscreen = FALSE;
+	fullscreen = 0;
 	sync = FALSE;
 
 	buffer = new char[BUFFER_SIZE];
@@ -118,6 +118,9 @@ void GLNode::readConfiguration()
 					} else if(!strcmp(tag, "yLocation")) {
 						number = strtok(NULL, " :");
 						sscanf(number, "%d", &y_location);
+					} else if(!strcmp(tag, "fullscreen")) {
+						number = strtok(NULL, " :");
+						sscanf(number, "%d", &fullscreen);
 					} else if(!strcmp(tag, "device")) {
 						number = strtok(NULL, " :");
 						sscanf(number, "%d", &device_id);
@@ -146,6 +149,7 @@ void GLNode::printStatus()
 	printf("\tWindow dimensions: %dpx x %dpx\n", win_width, win_height);
 	printf("\tWindow offset: %dpx, %dpx\n", x_offset, y_offset);
 	printf("\tWindow location: %dpx, %dpx\n", x_location, y_location);
+	printf("\tFullscreen: %d\n", fullscreen);
 	printf("\tUse graphics device: %d\n", device_id);
 	printf("\tListen on port: %d\n", port);
 }
@@ -390,7 +394,7 @@ BOOL GLNode::createWindow(char* title, int width, int height, int bits)
 		return FALSE;                                           // Return FALSE
 	}
 	
-	if (fullscreen)                                             // Attempt Fullscreen Mode?
+	/*if (fullscreen)                                             // Attempt Fullscreen Mode?
 	{
 		DEVMODE dmScreenSettings;                               // Device Mode
 		memset(&dmScreenSettings,0,sizeof(dmScreenSettings));   // Makes Sure Memory's Cleared
@@ -415,7 +419,7 @@ BOOL GLNode::createWindow(char* title, int width, int height, int bits)
 				return FALSE;                                   // Return FALSE
 			}
 		}
-	}
+	}*/
 
 	if (fullscreen)                                             // Are We Still In Fullscreen Mode?
 	{

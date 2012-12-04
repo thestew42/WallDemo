@@ -8,9 +8,10 @@ left:
   yOffset: 0
   xLocation: -1920
   yLocation: 0
+  fullscreen: 1
   device: 0
   address: 13337
-
+  
 right:
   width: 1920
   height: 1080
@@ -18,6 +19,7 @@ right:
   yOffset: 0
   xLocation: 0
   yLocation: 0
+  fullscreen: 1
   device: 0
   address: 13338
   

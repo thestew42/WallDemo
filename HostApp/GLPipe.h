@@ -8,8 +8,18 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#ifndef CAPTUREDLL
 #include <windows.h>
 #include <stdio.h>
+#endif
+
+#ifndef TRUE
+#define TRUE 1
+#define FALSE 0
+#define NULL 0
+typedef int BOOL;
+typedef unsigned int SOCKET;
+#endif
 
 class GLPipe
 {

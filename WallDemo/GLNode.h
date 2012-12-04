@@ -27,9 +27,6 @@ private:
 	//Dimensions of this window
 	int win_width, win_height;
 
-	//Is the window fullscreen
-	BOOL fullscreen;
-
 	//Total dimensions of the host application
 	int host_width, host_height;
 
@@ -38,6 +35,9 @@ private:
 
 	//Location of this window in screen space
 	int x_location, y_location;
+
+	//Should the window be fullscreen
+	int fullscreen;
 
 	//ID of the graphics device to use
 	int device_id;

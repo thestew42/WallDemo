@@ -10,8 +10,12 @@
 
 #include "GLPipe.h"
 
+#ifndef CAPTUREDLL
 #include <gl\gl.h>
 #include <gl\glu.h>
+#else
+#include "dummy_gl.h"
+#endif
 
 //The size of the buffer to hold command and arguments
 #define BUFFER_SIZE 10485760
