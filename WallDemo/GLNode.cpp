@@ -610,17 +610,69 @@ GLvoid GLNode::ReSizeGLScene(GLsizei width, GLsizei height)
 	glLoadIdentity();									// Reset The Modelview Matrix
 }
 
-/*  All Setup For OpenGL Goes Here                                          *
- *  Code taken from NeHe (http://nehe.gamedev.net/) Tutorial 2              */
+/*Sets up OpenGL and attempts to select a GPU based on the config parameters*/
 int GLNode::InitGL(GLvoid)
 {
-	glShadeModel(GL_SMOOTH);							// Enable Smooth Shading
-	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);				// Black Background
-	glClearDepth(1.0f);									// Depth Buffer Setup
-	glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
-	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
-	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
-	return TRUE;										// Initialization Went OK
+	UINT *ids = new UINT[6];
+	char *name = new char[256];
+	int num_gpus = 0;
+
+	if(GLEW_OK != glewInit())
+		return FALSE;
+
+	//Try to choose video card with WGL_AMD_gpu_association
+	if(WGLEW_AMD_gpu_association)
+	{
+		num_gpus = wglGetGPUIDsAMD(6, ids);
+		printf("Found %d AMD GPUs\n", num_gpus);
+
+		if(device_id >= 0 && device_id < num_gpus) {
+			printf("Selected GPU has ID %d\n", ids[device_id]);
+
+			//Determine type of selected GPU
+			wglGetGPUInfoAMD(ids[device_id], WGL_GPU_RENDERER_STRING_AMD, GL_UNSIGNED_BYTE, 256, name);
+			printf("Selected GPU is %s\n", name);
+
+			//Create a new context for this GPU and make it current
+			HGLRC associated_context = wglCreateAssociatedContextAMD(ids[device_id]);
+			if(associated_context == NULL)
+			{
+				printf("Error: could not create associated context for selected GPU\n");
+				return FALSE;
+			}
+			
+			//Set as the current context
+			if(wglMakeAssociatedContextCurrentAMD(associated_context) == FALSE)
+			{
+				printf("Error: could not make associated context current\n");
+				return FALSE;
+			}
+
+			//Delete old context and switch pointer to context
+			if(wglDeleteContext(hRC) == FALSE)
+			{
+				printf("Warning: could not delete old context");
+			}
+			hRC = associated_context;
+
+			printf("Successfully created and set AMD GPU associated context\n");
+		} else {
+			printf("Warning: device ID in config file (%d) is too high. Only %d GPUs available, using default.\n", device_id);
+		}
+	} else {
+		printf("Warning: AMD_gpu_association is not supported. GPU will not be selected.\n");
+	}
+
+	delete [] ids;
+	delete [] name;
+	
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+	return TRUE;
 }
 
 /*  Callback to handle windows messages                                     *

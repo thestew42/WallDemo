@@ -33,7 +33,7 @@ wglShareLists_td real_wglShareLists;
 wglUseFontBitmapsA_td real_wglUseFontBitmapsA;
 wglUseFontBitmapsW_td real_wglUseFontBitmapsW;
 
-//This is a global handle to point to the REAL ddraw.dll (in system32 folder)
+//This is a global handle to point to the REAL opengl32.dll (in system32 folder)
 HINSTANCE hRealDll;
 
 //DLL entry point

@@ -11,8 +11,11 @@
 
 #include <winsock2.h>
 #include <windows.h>
+#include <gl\glew.h>
+#include <gl\wglew.h>
 #include <gl\gl.h>
 #include <gl\glu.h>
+#include <gl\wglext.h>
 
 //The size of the buffer to hold command and arguments
 #define BUFFER_SIZE 10485760
