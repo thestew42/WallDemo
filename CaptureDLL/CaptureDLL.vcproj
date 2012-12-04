@@ -58,7 +58,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Ws2_32.lib"
-				OutputFile="$(OutDir)\opengl32.dll"
+				OutputFile="$(OutDir)\opengl.dll"
 				ModuleDefinitionFile=""
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -129,7 +129,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalDependencies="Ws2_32.lib"
-				OutputFile="$(OutDir)\opengl32.dll"
+				OutputFile="$(OutDir)\opengl.dll"
 				ModuleDefinitionFile=""
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"

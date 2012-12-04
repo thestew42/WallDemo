@@ -7,6 +7,7 @@
  */
 
 #include <windows.h>		// Header File For Windows
+#include <gl\glew.h>		// Header File For The GLu32 Library
 #include <gl\gl.h>			// Header File For The OpenGL32 Library
 #include <gl\glu.h>			// Header File For The GLu32 Library
 
@@ -20,6 +21,12 @@ bool	active=TRUE;		// Window Active Flag Set To TRUE By Default
 bool	fullscreen=TRUE;	// Fullscreen Flag Set To Fullscreen Mode By Default
 
 LRESULT	CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);	// Declaration For WndProc
+
+//Frame buffers
+UINT nFBO, nRBO;
+
+//Texture to render on quad
+GLuint textureId;
 
 GLvoid ReSizeGLScene(GLsizei width, GLsizei height)		// Resize And Initialize The GL Window
 {
@@ -48,26 +55,95 @@ int InitGL(GLvoid)										// All Setup For OpenGL Goes Here
 	glEnable(GL_DEPTH_TEST);							// Enables Depth Testing
 	glDepthFunc(GL_LEQUAL);								// The Type Of Depth Testing To Do
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);	// Really Nice Perspective Calculations
+
+	if(GLEW_OK != glewInit())
+		return FALSE;
+
+	//Set up buffers for offscreen rendering
+	glGenTextures(1, &textureId);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 640, 480, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//Set up frame buffer
+	glGenFramebuffers(1, &nFBO);
+	glGenRenderbuffers(1, &nRBO);
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, nRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 640, 480);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	//Attach the texture to FBO color attachment point
+	glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, textureId, 0);
+
+	//Attach the render buffer to depth
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, nRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	glEnable(GL_TEXTURE_2D);
+
 	return TRUE;										// Initialization Went OK
 }
 
 int DrawGLScene(GLvoid)									// Here's Where We Do All The Drawing
 {
+	//Set to render to buffer
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nFBO);
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	// Clear Screen And Depth Buffer
 	glLoadIdentity();									// Reset The Current Modelview Matrix
 	glTranslatef(-1.5f,0.0f,-6.0f);						// Move Left 1.5 Units And Into The Screen 6.0
+	glColor3f(1.0f,0.0f,1.0f);
 	glBegin(GL_TRIANGLES);								// Drawing Using Triangles
 		glVertex3f( 0.0f, 1.0f, 0.0f);					// Top
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
 	glEnd();											// Finished Drawing The Triangle
 	glTranslatef(3.0f,0.0f,0.0f);						// Move Right 3 Units
+	glColor3f(1.0f,0.0f,0.0f);
 	glBegin(GL_QUADS);									// Draw A Quad
 		glVertex3f(-1.0f, 1.0f, 0.0f);					// Top Left
 		glVertex3f( 1.0f, 1.0f, 0.0f);					// Top Right
 		glVertex3f( 1.0f,-1.0f, 0.0f);					// Bottom Right
 		glVertex3f(-1.0f,-1.0f, 0.0f);					// Bottom Left
 	glEnd();											// Done Drawing The Quad
+
+	//Break binding to render to screen
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+	//Render buffer to screen using a fullscreen quad
+	glMatrixMode(GL_PROJECTION);
+	glPushMatrix();
+	glLoadIdentity();
+	glMatrixMode(GL_MODELVIEW);
+	glPushMatrix();
+	glLoadIdentity();
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f, 0.0f);
+	glVertex3f(-1.0f,-1.0f, -1.0f);
+
+	glTexCoord2f(1.0f, 0.0f);
+	glVertex3f( 1.0f,-1.0f, -1.0f);
+
+	glTexCoord2f(1.0f, 1.0f);
+	glVertex3f( 1.0f, 1.0f, -1.0f);
+
+	glTexCoord2f(0.0f, 1.0f);
+	glVertex3f(-1.0f, 1.0f, -1.0f);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glPopMatrix();
+	glMatrixMode(GL_PROJECTION);
+	glPopMatrix();
+	glMatrixMode(GL_MODELVIEW);
+
 	return TRUE;										// Keep Going
 }
 

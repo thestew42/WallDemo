@@ -43,6 +43,7 @@ GLNode::GLNode(char *i_configFile, char *i_nodeIndentifier)
 
 	hDC = NULL;
 	hRC = NULL;
+	associated_hRC = NULL;
 	hWnd = NULL;
 	fullscreen = 0;
 	sync = FALSE;
@@ -264,7 +265,7 @@ void GLNode::mainLoop()
 	timeout.tv_usec = 0;
 
 	//False while main loop still running
-	BOOL done = FALSE;
+	done = FALSE;
 	
 	while(!done) {
 		//Check if a message is ready
@@ -280,13 +281,45 @@ void GLNode::mainLoop()
 				done=TRUE;
 			
 			if(sync) {
-				SwapBuffers(hDC);
 				sync = FALSE;
+
+				//If associated context is used, blit to the visible context
+				if(associated_hRC) {
+					glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nRemoteDataFBO);
+
+					//Release semaphore and wait for blit to finish
+					ReleaseSemaphore(hSemaphore, 1, NULL);
+
+					WaitForSingleObject(hSemaphore2, INFINITE);
+
+					//Break binding to render to screen
+					glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+					//Render buffer to screen using a fullscreen quad
+					glMatrixMode(GL_PROJECTION);
+					glLoadIdentity();
+					glMatrixMode(GL_MODELVIEW);
+					glLoadIdentity();
+					glBindTexture(GL_TEXTURE_2D, textureId);
+					glBegin(GL_QUADS);
+					glTexCoord2f(0.0f, 0.0f);
+					glVertex3f(-1.0f,-1.0f, -1.0f);
+					glTexCoord2f(1.0f, 0.0f);
+					glVertex3f( 1.0f,-1.0f, -1.0f);
+					glTexCoord2f(1.0f, 1.0f);
+					glVertex3f( 1.0f, 1.0f, -1.0f);
+					glTexCoord2f(0.0f, 1.0f);
+					glVertex3f(-1.0f, 1.0f, -1.0f);
+					glEnd();
+					glBindTexture(GL_TEXTURE_2D, 0);
+				}
+
+				SwapBuffers(hDC);
 			}
 		}
 
 		//Check if there is a command waiting from the host and accept it
-		if(select(0, &conn, NULL, NULL, &timeout) > 0)
+		if(!associated_hRC && select(0, &conn, NULL, NULL, &timeout) > 0)
 			receiveCommand();
 	}
 }
@@ -309,6 +342,7 @@ int GLNode::receiveCommand()
 	if(id == 0) {
 		//This is a syncronize message, signal the window to swap buffers
 		sync = TRUE;
+		sync2 = TRUE;
 	} else {
 		//Call the correct handler
 		(this->*handlers[id])();
@@ -524,6 +558,12 @@ BOOL GLNode::createWindow(char* title, int width, int height, int bits)
 		return FALSE;                               // Return FALSE
 	}
 
+	//Clear projection matrix if associated context was created
+	if(associated_hRC != NULL) {
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+	}
+
 	return TRUE;                                    // Success
 }
 
@@ -610,6 +650,122 @@ GLvoid GLNode::ReSizeGLScene(GLsizei width, GLsizei height)
 	glLoadIdentity();									// Reset The Modelview Matrix
 }
 
+void GLNode::OffscreenThreadMain()
+{
+	//Set as the current context
+	if(wglMakeAssociatedContextCurrentAMD(associated_hRC) == FALSE)
+	{
+		printf("Error: could not make associated context current\n");
+		return;
+	}
+
+	printf("Successfully created and set AMD GPU associated context\n");
+
+	//Set up buffer
+	UINT offscreenFBO, offscreenRBO;
+	GLuint offscreenTexture;
+
+	glGenTextures(1, &offscreenTexture);
+	glBindTexture(GL_TEXTURE_2D, offscreenTexture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+	glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); 
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, win_width, win_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glGenFramebuffers(1, &offscreenFBO);
+	glGenRenderbuffers(1, &offscreenRBO );
+	glBindFramebuffer(GL_DRAW_FRAMEBUFFER, offscreenFBO);
+	glBindRenderbuffer(GL_RENDERBUFFER, offscreenRBO);
+	glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, win_width, win_height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	//Attach the texture to FBO color attachment point
+	glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+	//Attach depth buffer
+	glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, offscreenRBO);
+
+	glBindFramebuffer(GL_FRAMEBUFFER, 0);
+	glBindFramebuffer(GL_FRAMEBUFFER, offscreenFBO);
+
+	//Setup scene size on offscreen context
+	ReSizeGLScene(win_width, win_height);
+
+	glShadeModel(GL_SMOOTH);
+	glClearDepth(1.0f);
+	glEnable(GL_DEPTH_TEST);
+	glDepthFunc(GL_LEQUAL);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	//Create fd_set for checking socket status
+	fd_set conn;
+	FD_ZERO(&conn);
+	FD_SET(node_sock, &conn);
+
+	//Timeout for select operation
+	timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+
+	sync2 = FALSE;
+
+	//Loop while not exiting
+	while(!done)
+	{
+		if(sync2) {
+			sync2 = FALSE;
+
+			//Wait for the semaphore
+			WaitForSingleObject(hSemaphore, INFINITE);
+
+			//Blit to on screen window
+			wglBlitContextFramebufferAMD(hRC,
+							0, 0, win_width, win_height,
+							0, 0, win_width, win_height,
+							GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT, GL_NEAREST);
+
+			//Insert fence to wait for completion
+			remoteFence = glFenceSync(GL_SYNC_GPU_COMMANDS_COMPLETE, 0);
+
+			// Wait for blit to finish
+			GLenum BlitStatus = glClientWaitSync(remoteFence, GL_SYNC_FLUSH_COMMANDS_BIT, 100000000);
+			if(BlitStatus == GL_CONDITION_SATISFIED  || BlitStatus == GL_ALREADY_SIGNALED) {
+				
+			} else {
+				printf("Warning: Blit fail\n");
+			}
+			
+			// Indicate that blit is finished
+			ReleaseSemaphore(hSemaphore2, 1, NULL);
+			
+			//glDeleteSync(remoteFence);
+		}
+
+		if(select(0, &conn, NULL, NULL, &timeout) > 0)
+			receiveCommand();
+	}
+
+	//Clean up context
+	if(!wglMakeAssociatedContextCurrentAMD(NULL))
+	{
+		MessageBox(NULL,"Unable to detatch associated context.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+	}
+	if(!wglDeleteAssociatedContextAMD(associated_hRC))
+	{
+		MessageBox(NULL,"Release associated rendering context failed.","SHUTDOWN ERROR",MB_OK | MB_ICONINFORMATION);
+	}
+	associated_hRC = NULL;
+}
+
+DWORD WINAPI OffscreenRenderShell(LPVOID param)
+{
+	((GLNode*)param)->OffscreenThreadMain();
+	return 0;
+}
+
 /*Sets up OpenGL and attempts to select a GPU based on the config parameters*/
 int GLNode::InitGL(GLvoid)
 {
@@ -634,28 +790,48 @@ int GLNode::InitGL(GLvoid)
 			printf("Selected GPU is %s\n", name);
 
 			//Create a new context for this GPU and make it current
-			HGLRC associated_context = wglCreateAssociatedContextAMD(ids[device_id]);
-			if(associated_context == NULL)
+			associated_hRC = wglCreateAssociatedContextAMD(ids[device_id]);
+			if(associated_hRC == NULL)
 			{
 				printf("Error: could not create associated context for selected GPU\n");
 				return FALSE;
 			}
-			
-			//Set as the current context
-			if(wglMakeAssociatedContextCurrentAMD(associated_context) == FALSE)
-			{
-				printf("Error: could not make associated context current\n");
-				return FALSE;
-			}
 
-			//Delete old context and switch pointer to context
-			if(wglDeleteContext(hRC) == FALSE)
-			{
-				printf("Warning: could not delete old context");
-			}
-			hRC = associated_context;
+			//Create semaphore
+			hSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
+			hSemaphore2 = CreateSemaphore(NULL, 0, 1, NULL);
 
-			printf("Successfully created and set AMD GPU associated context\n");
+			//Launch new thread for this offscreen render context
+			CreateThread(NULL, 0, OffscreenRenderShell, this, 0, NULL);
+
+			printf("Successfully created context and launched thread\n");
+
+			//Set up texture for full screen quad
+			glGenTextures(1, &textureId);
+			glBindTexture(GL_TEXTURE_2D, textureId);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR); 
+			glTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE); 
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, win_width, win_height, 0, GL_BGRA, GL_UNSIGNED_BYTE, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+
+			//Set up frame buffer
+			glGenFramebuffers(1, &nRemoteDataFBO);
+			glGenRenderbuffers(1, &nRemoteDataRBO);
+			glBindFramebuffer(GL_DRAW_FRAMEBUFFER, nRemoteDataFBO);
+			glBindRenderbuffer(GL_RENDERBUFFER, nRemoteDataRBO);
+			glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, win_width, win_height);
+			glBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+			//Attach the texture to FBO color attachment point
+			glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textureId, 0);
+
+			//Attach the render buffer to depth
+			glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, nRemoteDataRBO);
+
+			glBindFramebuffer(GL_FRAMEBUFFER, 0);
 		} else {
 			printf("Warning: device ID in config file (%d) is too high. Only %d GPUs available, using default.\n", device_id);
 		}
@@ -670,6 +846,7 @@ int GLNode::InitGL(GLvoid)
 	glClearColor(0.0f, 0.0f, 0.0f, 0.5f);
 	glClearDepth(1.0f);
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_TEXTURE_2D);
 	glDepthFunc(GL_LEQUAL);
 	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
 	return TRUE;

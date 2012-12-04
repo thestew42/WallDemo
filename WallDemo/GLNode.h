@@ -25,6 +25,9 @@
 //Declaration For WndProc
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
+//Function header for thread entry point
+DWORD WINAPI OffscreenRenderShell(LPVOID param);
+
 class GLNode {
 private:
 	//Dimensions of this window
@@ -54,6 +57,9 @@ private:
 	//Permanent Rendering Context
 	HGLRC hRC;
 
+	//Offscreen AMD associated context
+	HGLRC associated_hRC;
+
 	//Holds Our Window Handle
 	HWND hWnd;
 
@@ -65,6 +71,21 @@ private:
 
 	//Syncronization flag
 	BOOL sync;
+	BOOL sync2;
+
+	//Semaphore for synchronizing render threads
+	HANDLE hSemaphore;
+	HANDLE hSemaphore2;
+	GLsync remoteFence;
+
+	//Frame buffers
+	UINT nRemoteDataFBO, nRemoteDataRBO;
+
+	//Texture to render on quad
+	GLuint textureId;
+
+	//False while still running
+	BOOL done;
 
 	//Command line arguments specify config file and this node's identifier
 	char *configFile;
@@ -90,6 +111,9 @@ public:
 
 	//Receives an OpenGL command and runs it
 	int receiveCommand();
+
+	//Runs to render to offscreen buffer
+	void OffscreenThreadMain();
 
 	//Prepares the internal buffer for arguments
 	void prepareBuffer(unsigned int length);
