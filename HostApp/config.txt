@@ -1,6 +1,7 @@
 totalWidth: 3840
 totalHeight: 1080
 nodes: 2
+multiGPU: 1
 left:
   width: 1920
   height: 1080

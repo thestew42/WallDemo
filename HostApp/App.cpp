@@ -74,6 +74,7 @@ int App::mainLoop()
 		rgl_interface->glLoadIdentity();
 		rgl_interface->glTranslatef(0.0f, 0.0f, -7.0f);
 		rgl_interface->glRotatef(rtri, 0.0f, 1.0f, 0.0f);
+		rgl_interface->glScalef(3.0f, 3.0f, 3.0f);
 
 		//Draw the shape
 		rgl_interface->glBegin(GL_TRIANGLES);
@@ -82,12 +83,12 @@ int App::mainLoop()
 			rgl_interface->glColor3f(0.0f,1.0f,0.0f);
 			rgl_interface->glVertex3f(-1.0f,-1.0f, 1.0f);
 			rgl_interface->glColor3f(0.0f,0.0f,1.0f);
-			rgl_interface->glVertex3f( 1.0f,-1.0f, 1.0f);
+			rgl_interface->glVertex3f( 1.0f,-1.0f, 0.0f);
 
 			rgl_interface->glColor3f(1.0f,0.0f,0.0f);
 			rgl_interface->glVertex3f( 0.0f, 1.0f, 0.0f);
 			rgl_interface->glColor3f(0.0f,1.0f,0.0f);
-			rgl_interface->glVertex3f( 1.0f,-1.0f, -1.0f);
+			rgl_interface->glVertex3f( 1.0f,-1.0f, 0.0f);
 			rgl_interface->glColor3f(0.0f,0.0f,1.0f);
 			rgl_interface->glVertex3f(-1.0f,-1.0f, -1.0f);
    

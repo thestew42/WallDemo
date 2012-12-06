@@ -32,7 +32,8 @@ GLFHandler handlers[] = {NULL,
 	&GLNode::_glEnd,
 	&GLNode::_glVertex3f,
 	&GLNode::_glColor3f,
-	&GLNode::_glRotatef
+	&GLNode::_glRotatef,
+	&GLNode::_glScalef
 };
 
 //Constructor for the GLNode
@@ -46,6 +47,7 @@ GLNode::GLNode(char *i_configFile, char *i_nodeIndentifier)
 	associated_hRC = NULL;
 	hWnd = NULL;
 	fullscreen = 0;
+	multiGPU = 0;
 	sync = FALSE;
 
 	buffer = new char[BUFFER_SIZE];
@@ -89,6 +91,9 @@ void GLNode::readConfiguration()
 				sscanf(number, "%d", &host_height);
 			} else if(!strcmp(tag, "nodes")) {
 				//Ignore
+			} else if(!strcmp(tag, "multiGPU")) {
+				number = strtok(NULL, " :");
+				sscanf(number, "%d", &multiGPU);
 			} else if(!strcmp(tag, nodeIdentifier)) {
 				//Read this node's properties
 				while(!feof(fp)) {
@@ -741,7 +746,7 @@ void GLNode::OffscreenThreadMain()
 			// Indicate that blit is finished
 			ReleaseSemaphore(hSemaphore2, 1, NULL);
 			
-			//glDeleteSync(remoteFence);
+			glDeleteSync(remoteFence);
 		}
 
 		if(select(0, &conn, NULL, NULL, &timeout) > 0)
@@ -777,7 +782,7 @@ int GLNode::InitGL(GLvoid)
 		return FALSE;
 
 	//Try to choose video card with WGL_AMD_gpu_association
-	if(WGLEW_AMD_gpu_association)
+	if(multiGPU && WGLEW_AMD_gpu_association)
 	{
 		num_gpus = wglGetGPUIDsAMD(6, ids);
 		printf("Found %d AMD GPUs\n", num_gpus);
@@ -836,7 +841,10 @@ int GLNode::InitGL(GLvoid)
 			printf("Warning: device ID in config file (%d) is too high. Only %d GPUs available, using default.\n", device_id);
 		}
 	} else {
-		printf("Warning: AMD_gpu_association is not supported. GPU will not be selected.\n");
+		if(multiGPU)
+			printf("Warning: AMD_gpu_association is not supported. GPU will not be selected.\n");
+		else
+			printf("Use of explicit multi-gpu is disabled.\n");
 	}
 
 	delete [] ids;
@@ -1003,4 +1011,15 @@ void GLNode::_glRotatef()
 	getGLfloat(&y);
 	getGLfloat(&z);
 	glRotatef(angle, x, y, z);
+}
+
+//10: glScalef - multiply the current matrix by a general scaling matrix
+void GLNode::_glScalef()
+{
+	GLfloat x, y, z;
+	prepareBuffer(3 * sizeof(GLfloat));
+	getGLfloat(&x);
+	getGLfloat(&y);
+	getGLfloat(&z);
+	glScalef(x, y, z);
 }

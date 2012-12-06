@@ -78,4 +78,5 @@ public:
 	void glVertex3f(GLfloat x, GLfloat y, GLfloat z);
 	void glColor3f(GLfloat red, GLfloat green, GLfloat blue);
 	void glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z);
+	void glScalef(GLfloat x, GLfloat y, GLfloat z);
 };

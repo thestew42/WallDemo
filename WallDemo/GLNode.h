@@ -48,6 +48,9 @@ private:
 	//ID of the graphics device to use
 	int device_id;
 
+	//Should multi-gpu feature be used
+	int multiGPU;
+
 	//Port to listen on
 	int port;
 
@@ -157,4 +160,5 @@ public:
 	void _glVertex3f();
 	void _glColor3f();
 	void _glRotatef();
+	void _glScalef();
 };

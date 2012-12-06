@@ -50,6 +50,8 @@ RGLInterface::RGLInterface(char *configFile)
 			} else if(!strcmp(tag, "totalHeight")) {
 				number = strtok(NULL, " :");
 				sscanf(number, "%d", &height);
+			} else if(!strcmp(tag, "multiGPU")) {
+				//ignore
 			} else if(!strcmp(tag, "nodes")) {
 				number = strtok(NULL, " :");
 				sscanf(number, "%d", &num_nodes);
@@ -317,6 +319,16 @@ void RGLInterface::glRotatef(GLfloat angle, GLfloat x, GLfloat y, GLfloat z)
 {
 	pushCommand(9);
 	pushGLfloat(angle);
+	pushGLfloat(x);
+	pushGLfloat(y);
+	pushGLfloat(z);
+	sendCommand();
+}
+
+//10: glScalef - multiply the current matrix by a general scaling matrix
+void RGLInterface::glScalef(GLfloat x, GLfloat y, GLfloat z)
+{
+	pushCommand(10);
 	pushGLfloat(x);
 	pushGLfloat(y);
 	pushGLfloat(z);
